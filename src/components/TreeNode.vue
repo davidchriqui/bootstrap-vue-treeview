@@ -58,12 +58,12 @@
                         :showIcon="showIcon"
                         :prependIconClass="prependIconClass"
                         :contextMenu="contextMenu"
-                        @nodeSelect="childNodeSelect"
-                        @nodeDragStart="nodeDragStart"
-                        @deleteNode="deleteChildNode">
+                        @node-select="childNodeSelect"
+                        @node-drag-start="nodeDragStart"
+                        @delete-node="deleteChildNode">
                 </tree-node>
                 <drop-between-zone
-                        @nodeDrop="dropNodeAtPosition(index + 1)"
+                        @node-drop="dropNodeAtPosition(index + 1)"
                         v-if="!dropDisabled && draggedNode && draggedNode.data !== nodeData && (index + 1 >= data[childrenProp].length || draggedNode.data !== data[childrenProp][index + 1])">
                 </drop-between-zone>
             </template>
@@ -157,10 +157,10 @@
         },
         watch: {
             selected(selected) {
-                this.$emit('nodeSelect', this, selected)
+                this.$emit('node-select', this, selected)
             },
             dropDisabled(disabled) {
-                this.$emit(disabled ? 'dropDisabled' : 'dropEnabled')
+                this.$emit(disabled ? 'drop-disabled' : 'drop-enabled')
             },
             nodeDragOver(dragover) {
                 if (dragover) {
@@ -213,17 +213,17 @@
             },
             childNodeSelect(node, isSelected) {
                 // forward event to the parent node
-                this.$emit('nodeSelect', node, isSelected)
+                this.$emit('node-select', node, isSelected)
             },
             nodeDragStart() {
-                EventBus.$on('dropOK', this.cutNode)
+                EventBus.$on('drop-ok', this.cutNode)
             },
             cutNode() {
-                EventBus.$off('dropOK')
+                EventBus.$off('drop-ok')
                 let idx = this.data[this.childrenProp].indexOf(window._bTreeView.draggedNodeData)
                 this.data[this.childrenProp].splice(idx, 1)
                 // let's notify that node data was successfully cut (removed from array)
-                EventBus.$emit('cutOK')
+                EventBus.$emit('cut-ok')
             },
             getChildNodes() {
                 return this.$refs.childNodes || []
@@ -231,8 +231,8 @@
             dragstart(ev) {
                 this.dropDisabled = true
                 ev.dataTransfer.dropEffect = 'none'
-                this.$emit('nodeDragStart')
-                EventBus.$emit('nodeDragStart', this)
+                this.$emit('node-drag-start')
+                EventBus.$emit('node-drag-start', this)
                 // didn't use dataTransfer it's not fully supported by ie
                 // and beacuse it's not available in the dragover event handler
                 if (window._bTreeView === undefined) {
@@ -269,10 +269,10 @@
                 }
             },
             dragend(ev) {
-                EventBus.$off('dropOK')
-                EventBus.$off('cutOK')
+                EventBus.$off('drop-ok')
+                EventBus.$off('cut-ok')
                 this.dropDisabled = false
-                EventBus.$emit('nodeDragEnd')
+                EventBus.$emit('node-drag-end')
             },
             dragover(ev) {
                 ev.dataTransfer.dropEffect = this.dropEffect || 'none'
@@ -300,25 +300,25 @@
                 this.draggedNode = draggedNode
                 this.enterLeaveCounter = 0
                 // let's listen for the drag end event
-                EventBus.$on('nodeDragEnd', this.draggingEnded)
+                EventBus.$on('node-drag-end', this.draggingEnded)
             },
             draggingEnded() {
                 // stop listening for the dragging end event
-                EventBus.$off('nodeDragEnd', this.draggingEnded)
+                EventBus.$off('node-drag-end', this.draggingEnded)
                 this.draggedNode = null
             },
             dropNodeAtPosition(pos) {
                 // position can change if we move node within the same parent node (same level)
                 // so it's better to remember node at previous position
                 let insertAfter = pos - 1 < 0 ? null : this.data[this.childrenProp][pos - 1]
-                EventBus.$on('cutOK', () => {
+                EventBus.$on('cut-ok', () => {
                     let pos = this.data[this.childrenProp].indexOf(insertAfter) + 1
                     this.data[this.childrenProp].splice(pos, 0, window._bTreeView.draggedNodeData)
                     delete window._bTreeView.draggedNodeKey
                     delete window._bTreeView.draggedNodeData
-                    EventBus.$off('cutOK')
+                    EventBus.$off('cut-ok')
                 })
-                EventBus.$emit('dropOK')
+                EventBus.$emit('drop-ok')
             },
             showContextMenu(event) {
                 if (this.renaming) {
@@ -327,11 +327,11 @@
                 this.select()
                 if(this.contextMenu) {
                     event.preventDefault();
-                    EventBus.$emit('openNodeContextMenu', this)
+                    EventBus.$emit('open-node-context-menu', this)
                 }
             },
             delete() {
-                this.$emit('deleteNode', this)
+                this.$emit('delete-node', this)
             },
             deleteChildNode(childNodeData) {
                 let children = this.data[this.childrenProp]
@@ -365,17 +365,17 @@
             }
         },
         created() {
-            EventBus.$on('nodeDragStart', this.draggingStarted)
+            EventBus.$on('node-drag-start', this.draggingStarted)
             this.$watch(`data.${this.childrenProp}`, function (children) {
                 if (children.length === 0 && this.expanded) {
                     this.expanded = false
                 }
             })
             if (this.$parent) {
-                this.$parent.$on('dropDisabled', () => {
+                this.$parent.$on('drop-disabled', () => {
                     this.dropDisabled = true
                 })
-                this.$parent.$on('dropEnabled', () => {
+                this.$parent.$on('drop-enabled', () => {
                     this.dropDisabled = false
                 })
             }
