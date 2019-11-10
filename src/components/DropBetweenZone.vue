@@ -27,7 +27,7 @@ export default {
       ev.dataTransfer.dropEffect = 'move'
     },
     drop() {
-      this.$emit('nodeDrop')
+      this.$emit('node-drop')
     }
   }
 }

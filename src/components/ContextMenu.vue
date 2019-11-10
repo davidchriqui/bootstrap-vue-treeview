@@ -31,11 +31,11 @@ export default {
       this.$refs.ctxMenu.open()
     },
     menuItemSelected(item) {
-      EventBus.$emit('contextMenuItemSelect', item, this.activeNode)
+      EventBus.$emit('context-menu-item-select', item, this.activeNode)
     }
   },
   created() {
-    EventBus.$on('openNodeContextMenu', this.open)
+    EventBus.$on('open-node-context-menu', this.open)
   }
 }
 

@@ -23,9 +23,9 @@
                     :prependIconClass="prependIconClass"
                     :contextMenu="contextMenu"
                     ref="rootNodes"
-                    @nodeSelect="nodeSelect"
-                    @nodeDragStart="nodeDragStart"
-                    @deleteNode="deleteNode">
+                    @node-select="nodeSelect"
+                    @node-drag-start="nodeDragStart"
+                    @delete-node="deleteNode">
             </tree-node>
             <drop-between-zone
                     @nodeDrop="dropNodeAtPosition(index + 1)"
@@ -135,7 +135,7 @@
             },
             // event bubbles up to the roots
             nodeSelect(node, isSelected) {
-                this.$emit('nodeSelect', node, isSelected)
+                this.$emit('node-select', node, isSelected)
                 if (isSelected) {
                     if (this.selectedNode !== null) {
                         this.selectedNode.deselect()
@@ -146,37 +146,37 @@
                 }
             },
             nodeDragStart() {
-                EventBus.$on('dropOK', this.cutNode)
+                EventBus.$on('drop-ok', this.cutNode)
             },
             cutNode() {
-                EventBus.$off('dropOK')
+                EventBus.$off('drop-ok')
                 let idx = this.data.indexOf(window._bTreeView.draggedNodeData)
                 this.data.splice(idx, 1)
                 // let's notify that node data was successfully cut (removed from array)
-                EventBus.$emit('cutOK')
+                EventBus.$emit('cut-ok')
             },
             draggingStarted(draggedNode) {
                 this.draggedNode = draggedNode
                 // let's listen for the drag end event
-                EventBus.$on('nodeDragEnd', this.draggingEnded)
+                EventBus.$on('node-drag-end', this.draggingEnded)
             },
             draggingEnded() {
                 // stop listening for the dragging end event
-                EventBus.$off('nodeDragEnd', this.draggingEnded)
+                EventBus.$off('node-drag-end', this.draggingEnded)
                 this.draggedNode = null
             },
             dropNodeAtPosition(pos) {
                 // position can change if we move node within the same parent node (same level)
                 // so it's better to remember node at previous position
                 let insertAfter = pos - 1 < 0 ? null : this.data[pos - 1]
-                EventBus.$on('cutOK', () => {
+                EventBus.$on('cut-ok', () => {
                     let pos = this.data.indexOf(insertAfter) + 1
                     this.data.splice(pos, 0, window._bTreeView.draggedNodeData)
                     delete window._bTreeView.draggedNodeKey
                     delete window._bTreeView.draggedNodeData
-                    EventBus.$off('cutOK');
+                    EventBus.$off('cut-ok');
                 })
-                EventBus.$emit('dropOK')
+                EventBus.$emit('drop-ok')
             },
             deleteNode(nodeData) {
                 let nodes = this.data
@@ -190,14 +190,14 @@
                     case 'RENAME_NODE':
                         node.startRenaming()
                     default:
-                        this.$emit('contextMenuItemSelect', item, node)
+                        this.$emit('context-menu-item-select', item, node)
                 }
             }
         },
         created() {
             this.selectedNode = null
-            EventBus.$on('nodeDragStart', this.draggingStarted)
-            EventBus.$on('contextMenuItemSelect', this.menuItemSelected)
+            EventBus.$on('node-drag-start', this.draggingStarted)
+            EventBus.$on('context-menu-item-select', this.menuItemSelected)
             this.$nextTick(() => {
                 this.createNodeMap()
             })
