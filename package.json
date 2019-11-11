@@ -1,6 +1,6 @@
 {
   "name": "bootstrap-vue-treeview",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "A tree view component for Bootstrap 4 and Vue.js 2.x.",
   "main": "dist/treeview.js",
   "module": "dist/bootstrap-vue-treeview.esm.js",
@@ -8,7 +8,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "cross-env NODE_ENV=production node scripts/build",
     "dev": "cross-env NODE_ENV=development node scripts/dev",
-    "postinstall": "cross-env NODE_ENV=production node scripts/build"
+    "postinstall": "NODE_ENV=production node scripts/build"
   },
   "repository": {
     "type": "git",
